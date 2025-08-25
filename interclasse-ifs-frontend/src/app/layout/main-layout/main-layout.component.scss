@@ -1,0 +1,32 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; // Garante que o layout ocupe a tela toda
+  overflow: hidden; // Previne scroll na página inteira
+}
+
+app-header {
+  flex-shrink: 0; // Impede que o header encolha
+}
+
+.main-container {
+  display: flex;
+  flex: 1; // Ocupa todo o espaço vertical restante
+  overflow: hidden; // Previne scroll duplo
+}
+
+.sidebar {
+  width: 260px; // Um pouco mais de espaço para os títulos
+  background-color: #ffffff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  flex-shrink: 0;
+  overflow-y: auto; // Adiciona scroll apenas na sidebar se necessário
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f7fafc;
+  overflow-y: auto; // Scroll principal fica aqui
+}

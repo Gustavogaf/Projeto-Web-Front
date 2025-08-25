@@ -1,0 +1,105 @@
+<div class="gestao-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Gestão de Cursos</h2>
+      <button class="btn-add" (click)="abrirModalCurso()">+ Adicionar Curso</button>
+    </div>
+    <div class="card-body">
+      <div class="lista-itens">
+        @for (curso of cursos; track curso.id) {
+          <div class="item">
+            <div class="item-info">
+              <h3>{{ curso.nome }}</h3>
+              <p>Modalidade: {{ curso.categoria }}</p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-icon" (click)="abrirModalCurso(curso)">✏️</button>
+              <button class="btn-icon btn-delete" (click)="deletarCurso(curso.id)">🗑️</button>
+            </div>
+          </div>
+        } @empty {
+          <p class="empty-message">Nenhum curso cadastrado.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Gestão de Esportes</h2>
+      <button class="btn-add" (click)="abrirModalEsporte()">+ Adicionar Esporte</button>
+    </div>
+    <div class="card-body">
+      <div class="lista-itens">
+        @for (esporte of esportes; track esporte.id) {
+          <div class="item">
+            <div class="item-info">
+              <h3>{{ esporte.nome }}</h3>
+              <p>Mín. Atletas: {{ esporte.minAtletas }}</p>
+              <p>Máx. Atletas: {{ esporte.maxAtletas }}</p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-icon" (click)="abrirModalEsporte(esporte)">✏️</button>
+              <button class="btn-icon btn-delete" (click)="deletarEsporte(esporte.id)">🗑️</button>
+            </div>
+          </div>
+        } @empty {
+          <p class="empty-message">Nenhum esporte cadastrado.</p>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isCursoModalAberto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <h3>{{ isEditandoCurso ? 'Editar Curso' : 'Adicionar Novo Curso' }}</h3>
+      <form [formGroup]="cursoForm" (ngSubmit)="salvarCurso()">
+        <div class="form-group">
+          <label for="curso-nome">Nome do Curso</label>
+          <input id="curso-nome" type="text" formControlName="nome">
+        </div>
+        <div class="form-group">
+          <label for="curso-categoria">Modalidade</label>
+          <select id="curso-categoria" formControlName="categoria">
+            <option [ngValue]="null" disabled>Selecione a modalidade</option>
+            @for (cat of categoriasCurso; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="fecharModalCurso()">Cancelar</button>
+          <button type="submit" [disabled]="cursoForm.invalid">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isEsporteModalAberto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <h3>{{ isEditandoEsporte ? 'Editar Esporte' : 'Adicionar Novo Esporte' }}</h3>
+      <form [formGroup]="esporteForm" (ngSubmit)="salvarEsporte()">
+        <div class="form-group">
+          <label for="esporte-nome">Nome do Esporte</label>
+          <input id="esporte-nome" type="text" formControlName="nome">
+        </div>
+         <div class="form-group">
+          <label for="esporte-min">Qtd. Mínima de Atletas</label>
+          <input id="esporte-min" type="number" formControlName="minAtletas">
+        </div>
+         <div class="form-group">
+          <label for="esporte-max">Qtd. Máxima de Atletas</label>
+          <input id="esporte-max" type="number" formControlName="maxAtletas">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="fecharModalEsporte()">Cancelar</button>
+          <button type="submit" [disabled]="esporteForm.invalid">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

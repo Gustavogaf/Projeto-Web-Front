@@ -1,0 +1,15 @@
+<nav class="sidebar-nav">
+  <ul>
+    @for (item of itensVisiveis; track item.rota) {
+      <li>
+        <a
+          [routerLink]="item.rota"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link">
+          <span>{{ item.titulo }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
