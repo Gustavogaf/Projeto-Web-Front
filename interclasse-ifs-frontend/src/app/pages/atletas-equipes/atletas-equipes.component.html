@@ -61,7 +61,9 @@
               </div>
             }
           </div>
-        } @empty { <p class="empty-message">Nenhuma equipe cadastrada.</p> }
+        } @empty { 
+          <p class="empty-message">Nenhuma equipe cadastrada.</p> 
+        }
       </div>
     </div>
   </div>
@@ -99,25 +101,39 @@
 }
 
 @if (isEquipeModalAberto) {
-  <div class="form-group">
-  <label>Atletas da Equipe</label>
-  <div class="checklist-container">
-    @for (atleta of atletas; track atleta.matricula) {
-      <div class="checklist-item">
-        <input
-          type="checkbox"
-          [id]="'atleta-' + atleta.matricula"
-          [value]="atleta.matricula"
-          [checked]="atletaEstaNaEquipe(atleta.matricula)"
-          (change)="onCheckboxChange($event)">
-        <label [for]="'atleta-' + atleta.matricula">{{ atleta.nome }} ({{ atleta.apelido }})</label>
-      </div>
-    }
-  </div>
-</div>
-    }
-  </div>
-</div>
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <h3>{{ isEditando ? 'Editar Equipe' : 'Adicionar Equipe' }}</h3>
+      <form [formGroup]="equipeForm" (ngSubmit)="salvarEquipe()">
+        
+        <div class="form-group">
+          <label>Nome da Equipe</label>
+          <input formControlName="nome">
+        </div>
+        <div class="form-group">
+          <label>Esporte</label>
+          <input formControlName="esporte"> </div>
+        <div class="form-group">
+          <label>Curso</label>
+          <input formControlName="curso"> </div>
+
+        <div class="form-group">
+          <label>Atletas da Equipe</label>
+          <div class="checklist-container">
+            @for (atleta of atletas; track atleta.matricula) {
+              <div class="checklist-item">
+                <input
+                  type="checkbox"
+                  [id]="'atleta-' + atleta.matricula"
+                  [value]="atleta.matricula"
+                  [checked]="atletaEstaNaEquipe(atleta.matricula)"
+                  (change)="onCheckboxChange($event)">
+                <label [for]="'atleta-' + atleta.matricula">{{ atleta.nome }} ({{ atleta.apelido }})</label>
+              </div>
+            }
+          </div>
+        </div>
+
         @if (mensagemErroModal) { <p class="mensagem-erro">{{ mensagemErroModal }}</p> }
         <div class="modal-actions">
           <button type="button" class="btn-secondary" (click)="fecharModalEquipe()">Cancelar</button>
@@ -126,5 +142,4 @@
       </form>
     </div>
   </div>
-  </div>
-  
+}
