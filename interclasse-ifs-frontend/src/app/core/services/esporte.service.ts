@@ -36,7 +36,7 @@ export class EsporteService {
   }
 
   // Deleta um esporte
-  deletarEsporte(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deletarEsporte(id: number): Observable<any> { // Mudamos de Observable<void> para Observable<any>
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' }); // Adicionamos a opção responseType
   }
 }

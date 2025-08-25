@@ -1,0 +1,6 @@
+export enum TipoUsuario {
+  ATLETA = 'ATLETA',
+  TECNICO = 'TECNICO',
+  COORDENADOR = 'COORDENADOR',
+  ARBITRO = 'ARBITRO'
+}

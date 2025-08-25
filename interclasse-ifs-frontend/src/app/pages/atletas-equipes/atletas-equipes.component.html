@@ -1,0 +1,129 @@
+<div class="gestao-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Gestão de Atletas</h2>
+      @if (usuarioEhTecnico) {
+        <button class="btn-add" (click)="abrirModalAtleta()">+ Adicionar Atleta</button>
+      }
+    </div>
+    <div class="card-body">
+      <div class="search-bar">
+        <input type="text" placeholder="Pesquisar por matrícula...">
+      </div>
+      <div class="lista-itens">
+        @for (atleta of atletas; track atleta.matricula) {
+          <div class="item">
+            <div class="item-info">
+              <h3>{{ atleta.nome }} ({{ atleta.apelido }})</h3>
+              <p>Matrícula: {{ atleta.matricula }} | Telefone: {{ atleta.telefone }}</p>
+            </div>
+            @if (usuarioEhTecnico) {
+              <div class="item-actions">
+                <button class="btn-icon" (click)="abrirModalAtleta(atleta)">✏️</button>
+                <button class="btn-icon btn-delete" (click)="deletarAtleta(atleta.matricula)">🗑️</button>
+              </div>
+            }
+          </div>
+        } @empty {
+          <p class="empty-message">Nenhum atleta cadastrado.</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Gestão de Equipes</h2>
+      @if (usuarioEhTecnico) {
+        <button class="btn-add" (click)="abrirModalEquipe()">+ Adicionar Equipe</button>
+      }
+    </div>
+    <div class="card-body">
+      <div class="search-bar">
+        <input type="text" placeholder="Pesquisar equipe...">
+      </div>
+      <div class="lista-itens">
+        @for (equipe of equipes; track equipe.id) {
+          <div class="item">
+            <div class="item-info">
+              <h3>{{ equipe.nome }}</h3>
+              <p>{{ equipe.nomeCurso }} | {{ equipe.nomeEsporte }}</p>
+              <div class="badge-container">
+                @for (atleta of equipe.atletas; track atleta.matricula) {
+                  <span class="badge">{{ atleta.nome }}</span>
+                }
+              </div>
+            </div>
+             @if (usuarioEhTecnico) {
+              <div class="item-actions">
+                <button class="btn-icon" (click)="abrirModalEquipe(equipe)">✏️</button>
+                <button class="btn-icon btn-delete" (click)="deletarEquipe(equipe.id)">🗑️</button>
+              </div>
+            }
+          </div>
+        } @empty { <p class="empty-message">Nenhuma equipe cadastrada.</p> }
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isAtletaModalAberto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <h3>{{ isEditando ? 'Editar Atleta' : 'Adicionar Atleta' }}</h3>
+      <form [formGroup]="atletaForm" (ngSubmit)="salvarAtleta()">
+        <div class="form-group">
+          <label>Nome</label><input formControlName="nome">
+        </div>
+        <div class="form-group">
+          <label>Apelido</label><input formControlName="apelido">
+        </div>
+        <div class="form-group">
+          <label>Telefone</label><input formControlName="telefone">
+        </div>
+        <div class="form-group">
+          <label>Matrícula</label><input formControlName="matricula">
+        </div>
+        <div class="form-group">
+          <label>Senha {{ isEditando ? '(Opcional)' : '' }}</label>
+          <input type="password" formControlName="senha" [placeholder]="isEditando ? 'Deixe em branco para não alterar' : ''">
+        </div>
+        @if (mensagemErroModal) { <p class="mensagem-erro">{{ mensagemErroModal }}</p> }
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="fecharModalAtleta()">Cancelar</button>
+          <button type="submit" [disabled]="atletaForm.invalid">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isEquipeModalAberto) {
+  <div class="form-group">
+  <label>Atletas da Equipe</label>
+  <div class="checklist-container">
+    @for (atleta of atletas; track atleta.matricula) {
+      <div class="checklist-item">
+        <input
+          type="checkbox"
+          [id]="'atleta-' + atleta.matricula"
+          [value]="atleta.matricula"
+          [checked]="atletaEstaNaEquipe(atleta.matricula)"
+          (change)="onCheckboxChange($event)">
+        <label [for]="'atleta-' + atleta.matricula">{{ atleta.nome }} ({{ atleta.apelido }})</label>
+      </div>
+    }
+  </div>
+</div>
+    }
+  </div>
+</div>
+        @if (mensagemErroModal) { <p class="mensagem-erro">{{ mensagemErroModal }}</p> }
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="fecharModalEquipe()">Cancelar</button>
+          <button type="submit" [disabled]="equipeForm.invalid">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

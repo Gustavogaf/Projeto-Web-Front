@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CursoService } from '../../core/services/curso.service';
@@ -19,6 +19,7 @@ export class CursosEsportesComponent implements OnInit {
   private cursoService = inject(CursoService);
   private esporteService = inject(EsporteService);
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
 
   // Listas de dados
   cursos: Curso[] = [];
@@ -66,7 +67,10 @@ export class CursosEsportesComponent implements OnInit {
     this.cursoService.getCursos(0, 100)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: pagina => this.cursos = pagina.content,
+        next: pagina => {
+          this.cursos = pagina.content;
+          this.cdr.markForCheck(); // 3. Avise o Angular para atualizar a tela
+        },
         error: err => console.error('Erro ao carregar cursos:', err)
       });
   }
@@ -110,6 +114,7 @@ export class CursosEsportesComponent implements OnInit {
         error: (err) => {
           this.mensagemErroModal = 'Erro ao salvar curso. Verifique os dados ou suas permissões.';
           console.error('Erro ao salvar curso:', err);
+          this.cdr.markForCheck(); // 3. Avise o Angular para atualizar a tela
         }
       });
   }
@@ -120,9 +125,14 @@ export class CursosEsportesComponent implements OnInit {
       this.cursoService.deletarCurso(id)
         .pipe(finalize(() => this.isLoading = false))
         .subscribe({
-          next: () => this.carregarCursos(), // <-- Atualiza a lista
+          next: (mensagem) => {
+            // PASSO 1: Exibe a mensagem de sucesso que veio do backend
+            alert(mensagem);
+            // PASSO 2: Atualiza a lista de cursos
+            this.carregarCursos();
+          },
           error: (err) => {
-            alert('Erro ao deletar curso.');
+            alert('Ocorreu um erro ao deletar o curso.');
             console.error('Erro ao deletar curso:', err);
           }
         });
@@ -136,7 +146,10 @@ export class CursosEsportesComponent implements OnInit {
     this.esporteService.getEsportes(0, 100)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: pagina => this.esportes = pagina.content,
+        next: pagina => {
+          this.esportes = pagina.content;
+          this.cdr.markForCheck(); // 3. Avise o Angular para atualizar a tela
+        },
         error: err => console.error('Erro ao carregar esportes:', err)
       });
   }
@@ -181,6 +194,7 @@ export class CursosEsportesComponent implements OnInit {
         error: (err) => {
           this.mensagemErroModal = 'Erro ao salvar esporte. Verifique os dados ou suas permissões.';
           console.error('Erro ao salvar esporte:', err);
+          this.cdr.markForCheck(); // 3. Avise o Angular para atualizar a tela
         }
       });
   }
@@ -191,9 +205,14 @@ export class CursosEsportesComponent implements OnInit {
       this.esporteService.deletarEsporte(id)
         .pipe(finalize(() => this.isLoading = false))
         .subscribe({
-          next: () => this.carregarEsportes(), // <-- Atualiza a lista
+          next: (mensagem) => {
+            // PASSO 1: Exibe a mensagem de sucesso que veio do backend
+            alert(mensagem);
+            // PASSO 2: Atualiza a lista de esportes
+            this.carregarEsportes();
+          },
           error: err => {
-            alert('Erro ao deletar esporte.');
+            alert('Ocorreu um erro ao deletar o esporte.');
             console.error('Erro ao deletar esporte:', err);
           }
         });

@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-  // Usaremos o inject para uma sintaxe mais limpa
+  // Deixamos o authService PÚBLICO para que o template possa acessá-lo
   authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -24,19 +24,16 @@ export class HeaderComponent {
     senha: ['', [Validators.required]]
   });
 
-  // Lógica de login movida para cá
   onSubmit(): void {
-    if (this.loginForm.invalid) {
-      return;
-    }
+    if (this.loginForm.invalid) return;
     const { matricula, senha } = this.loginForm.value;
     this.authService.login({ matricula: matricula!, senha: senha! })
       .subscribe({
         next: () => {
           this.mensagemErro = null;
           this.loginForm.reset();
-          // Recarrega a página ou navega para a home para refletir o estado de login
-          window.location.reload();
+          // A navegação pode ser mais suave, mas reload funciona bem por agora
+          // this.router.navigate(['/home']);
         },
         error: (err) => {
           this.mensagemErro = 'Matrícula ou senha inválida.';
@@ -45,9 +42,7 @@ export class HeaderComponent {
       });
   }
 
-  // Lógica de logout
   logout(): void {
     this.authService.logout();
-    window.location.reload();
   }
 }

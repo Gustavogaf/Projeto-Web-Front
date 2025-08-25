@@ -1,0 +1,128 @@
+// Importando estilos globais que podemos criar no futuro
+// @import 'styles/card.scss';
+// @import 'styles/buttons.scss';
+// @import 'styles/forms.scss';
+
+.gestao-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+.form-card {
+  border-left: 4px solid #38b2ac; // Destaque verde
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+  }
+
+  input {
+    padding: 0.75rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.lista-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .item-info {
+    h3 {
+      margin: 0 0 0.25rem 0;
+    }
+    p {
+      margin: 0;
+      color: #718096;
+    }
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+}
+
+// Estilos de botões (exemplo)
+button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+
+  &.btn-add {
+    background-color: #2c7a7b;
+    color: white;
+  }
+  &[type="submit"] {
+    background-color: #2c7a7b;
+    color: white;
+  }
+  &.btn-secondary, &.btn-edit {
+    background-color: #edf2f7;
+    color: #4a5568;
+    border-color: #e2e8f0;
+  }
+  &.btn-delete {
+    background-color: #fff5f5;
+    color: #c53030;
+    border-color: #fed7d7;
+  }
+  &:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+  }
+}
+
+.empty-message {
+    text-align: center;
+    padding: 2rem;
+    color: #718096;
+}

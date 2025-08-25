@@ -2,7 +2,12 @@
   <h1 class="titulo">Jogos Interclasse IFS</h1>
 
   <div class="login-section">
-    @if (!authService.isLoggedIn()) {
+    @if (authService.usuarioAtual$ | async; as usuario) {
+      <div class="welcome-section">
+        <span>Bem-vindo!</span>
+        <button (click)="logout()" class="logout-button">Sair</button>
+      </div>
+    } @else {
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
         <div class="form-group">
           <label for="matricula">Login</label>
@@ -17,11 +22,6 @@
       @if (mensagemErro) {
         <span class="mensagem-erro">{{ mensagemErro }}</span>
       }
-    } @else {
-      <div class="welcome-section">
-        <span>Bem-vindo!</span>
-        <button (click)="logout()" class="logout-button">Sair</button>
-      </div>
     }
   </div>
 </header>

@@ -1,0 +1,59 @@
+<div class="gestao-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Árbitros Cadastrados</h2>
+      <button class="btn-add" (click)="abrirModal()">+ Adicionar Árbitro</button>
+    </div>
+    <div class="card-body">
+      <div class="lista-itens">
+        @for (arbitro of arbitros; track arbitro.matricula) {
+          <div class="item">
+            <div class="item-info">
+              <h3>{{ arbitro.nome }}</h3>
+              <p>Matrícula: {{ arbitro.matricula }}</p>
+            </div>
+            <div class="item-actions">
+              <button class="btn-icon" (click)="abrirModal(arbitro)">✏️</button>
+              <button class="btn-icon btn-delete" (click)="deletarArbitro(arbitro.matricula)">🗑️</button>
+            </div>
+          </div>
+        } @empty {
+          @if (!isLoading) {
+            <p class="empty-message">Nenhum árbitro cadastrado.</p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isModalAberto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <h3>{{ isEditando ? 'Editar Árbitro' : 'Adicionar Novo Árbitro' }}</h3>
+      <form [formGroup]="arbitroForm" (ngSubmit)="salvarArbitro()">
+        <div class="form-group">
+          <label for="arbitro-nome">Nome</label>
+          <input id="arbitro-nome" type="text" formControlName="nome" placeholder="Digite o nome do árbitro">
+        </div>
+        <div class="form-group">
+          <label for="arbitro-matricula">Matrícula</label>
+          <input id="arbitro-matricula" type="text" formControlName="matricula" placeholder="Digite a matrícula">
+        </div>
+         <div class="form-group">
+          <label for="arbitro-senha">Senha {{ isEditando ? '(Opcional)' : '' }}</label>
+          <input id="arbitro-senha" type="password" formControlName="senha" [placeholder]="isEditando ? 'Deixe em branco para não alterar' : ''">
+        </div>
+
+        @if (mensagemErroModal) {
+          <p class="mensagem-erro">{{ mensagemErroModal }}</p>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" [disabled]="arbitroForm.invalid || isLoading">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

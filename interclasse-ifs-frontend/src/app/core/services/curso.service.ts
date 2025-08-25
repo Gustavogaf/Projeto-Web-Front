@@ -38,7 +38,7 @@ export class CursoService {
   }
 
   // Deleta um curso
-  deletarCurso(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deletarCurso(id: number): Observable<any> { // Mudamos de Observable<void> para Observable<any>
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' }); // Adicionamos a opção responseType
   }
 }

@@ -1,0 +1,61 @@
+<div class="gestao-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>Lista de Técnicos ({{ tecnicos.length }})</h2>
+      @if (usuarioEhCoordenador) {
+        <button class="btn-add" (click)="abrirModal()">+ Adicionar Técnico</button>
+      }
+    </div>
+    <div class="card-body">
+      <div class="lista-itens">
+        @for (tecnico of tecnicos; track tecnico.matricula) {
+          <div class="item">
+            <div class="item-info">
+              <h3>{{ tecnico.nome }}</h3>
+              <p>Matrícula: {{ tecnico.matricula }}</p>
+              </div>
+            @if (usuarioEhCoordenador) {
+              <div class="item-actions">
+                <button class="btn-icon" (click)="abrirModal(tecnico)">✏️</button>
+                <button class="btn-icon btn-delete" (click)="deletarTecnico(tecnico.matricula)">🗑️</button>
+              </div>
+            }
+          </div>
+        } @empty {
+          @if (!isLoading) {
+            <p class="empty-message">Nenhum técnico cadastrado.</p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isModalAberto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <h3>{{ isEditando ? 'Editar Técnico' : 'Adicionar Novo Técnico' }}</h3>
+      <form [formGroup]="tecnicoForm" (ngSubmit)="salvarTecnico()">
+        <div class="form-group">
+          <label for="tecnico-nome">Nome</label>
+          <input id="tecnico-nome" type="text" formControlName="nome" placeholder="Nome completo do técnico">
+        </div>
+        <div class="form-group">
+          <label for="tecnico-matricula">Matrícula</label>
+          <input id="tecnico-matricula" type="text" formControlName="matricula" placeholder="Matrícula do técnico">
+        </div>
+        <div class="form-group">
+          <label for="tecnico-senha">Senha {{ isEditando ? '(Opcional)' : '' }}</label>
+          <input id="tecnico-senha" type="password" formControlName="senha" [placeholder]="isEditando ? 'Deixe em branco para não alterar' : ''">
+        </div>
+        @if (mensagemErroModal) {
+          <p class="mensagem-erro">{{ mensagemErroModal }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" [disabled]="tecnicoForm.invalid || isLoading">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
