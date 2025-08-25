@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, of } from 'rxjs';
+import { Observable, BehaviorSubject, tap, switchMap, of } from 'rxjs';
 import { AuthRequest, AuthResponse } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 
@@ -27,19 +27,21 @@ export class AuthService {
     this.carregarUsuarioLogado();
   }
 
-  login(credenciais: AuthRequest): Observable<AuthResponse> {
+  // --- MÉTODO LOGIN CORRIGIDO ---
+  login(credenciais: AuthRequest): Observable<UsuarioLogado> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credenciais).pipe(
-      tap(response => {
-        this.salvarToken(response.token);
-        // Após salvar o token, busca e armazena os dados do usuário
-        this.buscarEArmazenarUsuario();
-      })
+      // 1. Primeiro, salvamos o token que recebemos.
+      tap(response => this.salvarToken(response.token)),
+      // 2. Usamos switchMap para encadear uma nova requisição (buscar o usuário).
+      // O login só continua depois que esta nova requisição terminar.
+      switchMap(() => this.http.get<UsuarioLogado>(`${this.apiUrl}/debug/whoami`)),
+      // 3. Com os dados do usuário em mãos, os armazenamos no BehaviorSubject.
+      tap(usuario => this.usuarioAtualSubject.next(usuario))
     );
   }
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
-    // Limpa os dados do usuário
     this.usuarioAtualSubject.next(null);
     window.location.reload(); // Recarrega para um estado limpo
   }
@@ -58,37 +60,23 @@ export class AuthService {
   }
 
   // --- Métodos de Gerenciamento de Usuário ---
-
-  /**
-   * Se houver um token, busca os dados do usuário no endpoint /whoami
-   */
   private carregarUsuarioLogado(): void {
     if (this.isLoggedIn()) {
-      this.buscarEArmazenarUsuario();
+      // Usamos o mesmo método encadeado aqui para garantir consistência
+      this.http.get<UsuarioLogado>(`${this.apiUrl}/debug/whoami`).subscribe({
+        next: (usuario) => this.usuarioAtualSubject.next(usuario),
+        error: () => this.logout() // Se o token for inválido, desloga o usuário
+      });
     }
   }
 
-  /**
-   * Faz a chamada HTTP para /whoami e atualiza o BehaviorSubject
-   */
-  private buscarEArmazenarUsuario(): void {
-    this.http.get<UsuarioLogado>(`${this.apiUrl}/debug/whoami`).subscribe({
-      next: (usuario) => this.usuarioAtualSubject.next(usuario),
-      error: () => this.logout() // Se o token for inválido, desloga o usuário
-    });
-  }
+  // O método buscarEArmazenarUsuario() não é mais necessário pois a lógica está no login
+  // e no carregarUsuarioLogado()
 
-  /**
-   * Retorna o valor atual dos dados do usuário logado.
-   */
   get valorUsuarioAtual(): UsuarioLogado | null {
     return this.usuarioAtualSubject.value;
   }
 
-  /**
-   * Verifica se o usuário logado possui um determinado papel (role).
-   * AGORA VERIFICA A PARTIR DOS DADOS OBTIDOS DO BACKEND.
-   */
   possuiRole(role: string): boolean {
     const usuario = this.valorUsuarioAtual;
     if (!usuario || !usuario.authorities) {
@@ -97,9 +85,6 @@ export class AuthService {
     return usuario.authorities.includes(`ROLE_${role.toUpperCase()}`);
   }
 
-  /**
-   * Obtém a matrícula do usuário logado.
-   */
   getMatriculaUsuarioLogado(): string | null {
     return this.valorUsuarioAtual?.username ?? null;
   }

@@ -13,6 +13,7 @@ export class TecnicoService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/tecnicos`;
 
+    
     getTecnicos(page = 0, size = 100, sort = 'nome,asc'): Observable<PaginaTecnicos> {
         const params = new HttpParams()
             .set('page', page.toString())

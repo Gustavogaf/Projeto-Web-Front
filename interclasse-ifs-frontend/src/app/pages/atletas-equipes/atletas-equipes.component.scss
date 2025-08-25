@@ -1,30 +1,71 @@
-// Estilos gerais da página
-.gestao-container {
+// Importa Font Awesome se não estiver global
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
+
+:host {
+  font-family: 'Inter', sans-serif; // Fonte mais moderna
+}
+
+.page-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-// Estilo base para os cards
 .card {
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
 
-  h2 {
+  .card-title {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
-    color: #2d3748;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.search-wrapper {
+  position: relative;
+
+  i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    font-size: 0.9rem;
+  }
+
+  input {
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e0;
+    min-width: 250px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #38b2ac;
+      box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.2);
+    }
   }
 }
 
@@ -32,56 +73,42 @@
   padding: 1.5rem;
 }
 
-.search-bar {
-  margin-bottom: 1.5rem;
-  input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #cbd5e0;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 1rem;
-  }
-}
-
-// Container para as listas
-.lista-itens {
-  display: flex;
-  flex-direction: column;
+.item-list {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
-// Estilo individual de cada item na lista
-.item {
+.item-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem;
-  background-color: #f7fafc;
+  padding: 1rem;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
+  background-color: #fdfdff;
+  transition: box-shadow 0.2s, transform 0.2s;
 
-  .item-info {
-    h3 {
-      margin: 0 0 0.25rem 0;
-      font-weight: 600;
-      color: #1a202c;
-    }
-    p {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #718096;
-    }
-  }
-
-  .item-actions {
-    display: flex;
-    gap: 0.5rem;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
-// Estilos específicos para os badges de atletas na equipe
-.badge-container {
+.item-content {
+  .item-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+  .item-subtitle {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0.1rem 0;
+  }
+}
+
+.athlete-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -89,111 +116,145 @@
 }
 
 .badge {
-  background-color: #e2e8f0;
+  background-color: #edf2f7;
   color: #4a5568;
-  padding: 0.25rem 0.6rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
 }
 
-// Estilos de botões
-button {
-  padding: 0.6rem 1.2rem;
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --- ESTILOS DOS BOTÕES --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 6px;
+  border: 1px solid transparent;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid transparent;
   transition: all 0.2s;
 
-  &.btn-add {
-    background-color: #2c7a7b;
+  &.w-full {
+    width: 100%;
+  }
+
+  &.btn-primary {
+    background-color: #1a202c;
     color: white;
-    &:hover { background-color: #285e61; }
+    &:hover { background-color: #2d3748; }
   }
 
   &.btn-icon {
-    background: #fff;
-    border: 1px solid #cbd5e0;
-    padding: 0.5rem;
-    line-height: 1;
-    &:hover { background-color: #edf2f7; }
+    background: transparent;
+    border-color: #e2e8f0;
+    color: #718096;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    &:hover {
+      background-color: #f7fafc;
+      border-color: #cbd5e0;
+      color: #2d3748;
+    }
   }
 
-  &.btn-delete:hover {
-    background-color: #fed7d7;
-    border-color: #f56565;
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
   }
 }
 
-// Estilos do Modal
-.modal-backdrop {
+/* --- ESTILOS DOS MODAIS --- */
+.modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
 
-.modal-content {
+.modal-container {
   background: white;
-  padding: 2rem;
   border-radius: 8px;
-  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 90%;
   max-width: 500px;
+}
 
-  &.large {
-    max-width: 650px;
-  }
-
-  h3 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    font-size: 1.25rem;
+.modal-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .modal-title {
+    font-size: 1.125rem;
     font-weight: 600;
   }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #a0aec0;
+  cursor: pointer;
+  &:hover { color: #2d3748; }
+}
+
+.modal-body {
+  padding: 1.5rem;
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
   margin-bottom: 1rem;
-
   label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
     margin-bottom: 0.5rem;
-    font-weight: 600;
     color: #4a5568;
   }
-
   input, select {
-    padding: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
     border: 1px solid #cbd5e0;
-    border-radius: 4px;
-    font-size: 1rem;
-    box-sizing: border-box;
-  }
+    border-radius: 6px;
+    transition: border-color 0.2s, box-shadow 0.2s;
 
-  select {
-    background-color: white;
+    &:focus {
+      outline: none;
+      border-color: #38b2ac;
+      box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.2);
+    }
   }
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.checklist-container {
+.checklist-box {
   border: 1px solid #cbd5e0;
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 1rem;
-  max-height: 150px;
+  max-height: 180px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -204,45 +265,12 @@ button {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  font-size: 0.9rem;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
-
-  button {
-    &.btn-secondary {
-      background-color: #edf2f7;
-      color: #4a5568;
-      border-color: #e2e8f0;
-      &:hover { background-color: #e2e8f0; }
-    }
-
-    &[type="submit"] {
-      background-color: #2c7a7b;
-      color: white;
-      &:disabled {
-        background-color: #a0aec0;
-        cursor: not-allowed;
-      }
-    }
-  }
-}
-
-.empty-message {
+.empty-state, .loading-state {
   text-align: center;
   padding: 2rem;
   color: #718096;
-}
-
-.mensagem-erro {
-  background-color: #fed7d7;
-  color: #c53030;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.875rem;
+  font-style: italic;
 }

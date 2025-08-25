@@ -1,129 +1,196 @@
-<div class="gestao-container">
+<div class="page-container">
   <div class="card">
     <div class="card-header">
-      <h2>Gestão de Atletas</h2>
-      @if (usuarioEhTecnico) {
-        <button class="btn-add" (click)="abrirModalAtleta()">+ Adicionar Atleta</button>
-      }
+      <h2 class="card-title">
+        <i class="fas fa-users"></i>
+        Gestão de Equipes
+      </h2>
+      <div class="header-actions">
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Pesquisar equipe..." />
+        </div>
+        <button class="btn btn-primary" (click)="abrirModalEquipe()">
+          <i class="fas fa-plus"></i>
+          Adicionar Equipe
+        </button>
+      </div>
     </div>
     <div class="card-body">
-      <div class="search-bar">
-        <input type="text" placeholder="Pesquisar por matrícula...">
+      <div *ngIf="isLoading" class="loading-state">Carregando equipes...</div>
+      <div *ngIf="!isLoading && Equipes.length === 0" class="empty-state">
+        Nenhuma equipe cadastrada.
       </div>
-      <div class="lista-itens">
-        @for (atleta of atletas; track atleta.matricula) {
-          <div class="item">
-            <div class="item-info">
-              <h3>{{ atleta.nome }} ({{ atleta.apelido }})</h3>
-              <p>Matrícula: {{ atleta.matricula }} | Telefone: {{ atleta.telefone }}</p>
+      <div class="item-list" *ngIf="!isLoading && Equipes.length > 0">
+        <div class="item-card" *ngFor="let equipe of Equipes">
+          <div class="item-content">
+            <h3 class="item-title">{{ equipe.nome }}</h3>
+            <p class="item-subtitle">Curso: {{ equipe.nomeCurso }}</p>
+            <p class="item-subtitle">Esporte: {{ equipe.nomeEsporte }}</p>
+            <div class="athlete-badges">
+              <span class="badge" *ngFor="let atleta of equipe.atletas">{{ atleta.nome }}</span>
             </div>
-            @if (usuarioEhTecnico) {
-              <div class="item-actions">
-                <button class="btn-icon" (click)="abrirModalAtleta(atleta)">✏️</button>
-                <button class="btn-icon btn-delete" (click)="deletarAtleta(atleta.matricula)">🗑️</button>
-              </div>
-            }
           </div>
-        } @empty {
-          <p class="empty-message">Nenhum atleta cadastrado.</p>
-        }
+          <div class="item-actions">
+            <button class="btn-icon" (click)="abrirModalEquipe(equipe)">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn-icon" (click)="deletarEquipe(equipe.id)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <h2>Gestão de Equipes</h2>
-      @if (usuarioEhTecnico) {
-        <button class="btn-add" (click)="abrirModalEquipe()">+ Adicionar Equipe</button>
-      }
+      <h2 class="card-title">
+        <i class="fas fa-user"></i>
+        Gestão de Atletas
+      </h2>
+      <div class="header-actions">
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Pesquisar por matrícula..." />
+        </div>
+        <button class="btn btn-primary" (click)="abrirModalAtleta()">
+          <i class="fas fa-plus"></i>
+          Adicionar Atleta
+        </button>
+      </div>
     </div>
     <div class="card-body">
-      <div class="search-bar">
-        <input type="text" placeholder="Pesquisar equipe...">
+      <div *ngIf="isLoading" class="loading-state">Carregando atletas...</div>
+      <div *ngIf="!isLoading && Atletas.length === 0" class="empty-state">
+        Nenhum atleta cadastrado.
       </div>
-      <div class="lista-itens">
-        @for (equipe of equipes; track equipe.id) {
-          <div class="item">
-            <div class="item-info">
-              <h3>{{ equipe.nome }}</h3>
-              <p>{{ equipe.nomeCurso }} | {{ equipe.nomeEsporte }}</p>
-              <div class="badge-container">
-                @for (atleta of equipe.atletas; track atleta.matricula) {
-                  <span class="badge">{{ atleta.nome }}</span>
-                }
-              </div>
-            </div>
-             @if (usuarioEhTecnico) {
-              <div class="item-actions">
-                <button class="btn-icon" (click)="abrirModalEquipe(equipe)">✏️</button>
-                <button class="btn-icon btn-delete" (click)="deletarEquipe(equipe.id)">🗑️</button>
-              </div>
-            }
+      <div class="item-list" *ngIf="!isLoading && Atletas.length > 0">
+        <div class="item-card" *ngFor="let atleta of Atletas">
+          <div class="item-content">
+            <h3 class="item-title">{{ atleta.nome }}</h3>
+            <p class="item-subtitle">Apelido: {{ atleta.apelido || 'N/A' }}</p>
+            <p class="item-subtitle">Telefone: {{ atleta.telefone }}</p>
+            <p class="item-subtitle">Matrícula: {{ atleta.matricula }}</p>
           </div>
-        } @empty { <p class="empty-message">Nenhuma equipe cadastrada.</p> }
+          <div class="item-actions">
+            <button class="btn-icon" (click)="abrirModalAtleta(atleta)">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn-icon" (click)="deletarAtleta(atleta.matricula)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-@if (isAtletaModalAberto) {
-  <div class="modal-backdrop">
-    <div class="modal-content">
-      <h3>{{ isEditando ? 'Editar Atleta' : 'Adicionar Atleta' }}</h3>
-      <form [formGroup]="atletaForm" (ngSubmit)="salvarAtleta()">
-        <div class="form-group">
-          <label>Nome</label><input formControlName="nome">
-        </div>
-        <div class="form-group">
-          <label>Apelido</label><input formControlName="apelido">
-        </div>
-        <div class="form-group">
-          <label>Telefone</label><input formControlName="telefone">
-        </div>
-        <div class="form-group">
-          <label>Matrícula</label><input formControlName="matricula">
-        </div>
-        <div class="form-group">
-          <label>Senha {{ isEditando ? '(Opcional)' : '' }}</label>
-          <input type="password" formControlName="senha" [placeholder]="isEditando ? 'Deixe em branco para não alterar' : ''">
-        </div>
-        @if (mensagemErroModal) { <p class="mensagem-erro">{{ mensagemErroModal }}</p> }
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="fecharModalAtleta()">Cancelar</button>
-          <button type="submit" [disabled]="atletaForm.invalid">Salvar</button>
-        </div>
-      </form>
+<div class="modal-overlay" *ngIf="isAtletaModalAberto" (click)="fecharModalAtleta()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ isEditando ? 'Editar Atleta' : 'Adicionar Novo Atleta' }}</h3>
+      <button class="btn-close" (click)="fecharModalAtleta()">&times;</button>
     </div>
-  </div>
-}
-
-@if (isEquipeModalAberto) {
-  <div class="form-group">
-  <label>Atletas da Equipe</label>
-  <div class="checklist-container">
-    @for (atleta of atletas; track atleta.matricula) {
-      <div class="checklist-item">
-        <input
-          type="checkbox"
-          [id]="'atleta-' + atleta.matricula"
-          [value]="atleta.matricula"
-          [checked]="atletaEstaNaEquipe(atleta.matricula)"
-          (change)="onCheckboxChange($event)">
-        <label [for]="'atleta-' + atleta.matricula">{{ atleta.nome }} ({{ atleta.apelido }})</label>
+    <form [formGroup]="atletaForm" (ngSubmit)="salvarAtleta()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nomeAtleta">Nome</label>
+          <input id="nomeAtleta" type="text" formControlName="nome" placeholder="Nome completo do atleta" />
+        </div>
+        <div class="form-group">
+          <label for="apelido">Apelido</label>
+          <input id="apelido" type="text" formControlName="apelido" placeholder="Apelido do atleta" />
+        </div>
+        <div class="form-group">
+          <label for="telefone">Telefone</label>
+          <input id="telefone" type="text" formControlName="telefone" placeholder="(79) 99999-9999" />
+        </div>
+        <div class="form-group">
+          <label for="matricula">Matrícula</label>
+          <input id="matricula" type="text" formControlName="matricula" placeholder="Matrícula do atleta" />
+        </div>
+        <div class="form-group" *ngIf="!isEditando">
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" formControlName="senha" placeholder="Senha de acesso" />
+        </div>
       </div>
-    }
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary w-full" [disabled]="atletaForm.invalid || isLoading">
+          {{ isEditando ? 'Atualizar' : 'Adicionar' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>
-    }
-  </div>
-</div>
-        @if (mensagemErroModal) { <p class="mensagem-erro">{{ mensagemErroModal }}</p> }
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" (click)="fecharModalEquipe()">Cancelar</button>
-          <button type="submit" [disabled]="equipeForm.invalid">Salvar</button>
-        </div>
-      </form>
+
+<div class="modal-overlay" *ngIf="isEquipeModalAberto" (click)="fecharModalEquipe()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ isEditando ? 'Editar Equipe' : 'Adicionar Nova Equipe' }}</h3>
+      <button class="btn-close" (click)="fecharModalEquipe()">&times;</button>
     </div>
+    <form [formGroup]="equipeForm" (ngSubmit)="salvarEquipe()">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="nomeEquipe">Nome da Equipe</label>
+          <input id="nomeEquipe" type="text" formControlName="nome" placeholder="Nome da equipe" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="curso">Curso</label>
+            <select id="curso" formControlName="cursoId">
+              <option [ngValue]="null" disabled>Selecione o curso</option>
+              <option *ngFor="let curso of cursos" [value]="curso.id">{{ curso.nome }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="esporte">Esporte</label>
+            <select id="esporte" formControlName="esporteId">
+              <option [ngValue]="null" disabled>Selecione o esporte</option>
+              <option *ngFor="let esporte of esportes" [value]="esporte.id">{{ esporte.nome }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Atletas da Equipe</label>
+          <div class="checklist-box">
+            <ng-container *ngIf="isEditando">
+              <div class="checklist-item" *ngFor="let atleta of atletas">
+                <input
+                  *ngIf="atletaEstaNaEquipe(atleta.matricula)"
+                  type="checkbox"
+                  [id]="'atleta-edit-' + atleta.matricula"
+                  [value]="atleta.matricula"
+                  (change)="onCheckboxChange($event)"
+                  [checked]="true"
+                />
+                <label *ngIf="atletaEstaNaEquipe(atleta.matricula)" [for]="'atleta-edit-' + atleta.matricula">
+                  {{ atleta.nome }} ({{ atleta.apelido }})
+                </label>
+              </div>
+            </ng-container>
+            <div class="checklist-item" *ngFor="let atleta of atletasSemEquipe">
+              <input
+                type="checkbox"
+                [id]="'atleta-new-' + atleta.matricula"
+                [value]="atleta.matricula"
+                (change)="onCheckboxChange($event)"
+              />
+              <label [for]="'atleta-new-' + atleta.matricula">
+                {{ atleta.nome }} ({{ atleta.apelido }})
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary w-full" [disabled]="equipeForm.invalid || isLoading">
+          {{ isEditando ? 'Atualizar' : 'Adicionar' }}
+        </button>
+      </div>
+    </form>
   </div>
-}
+</div>

@@ -70,29 +70,32 @@ export class AtletasEquipesComponent implements OnInit {
       nome: ['', Validators.required],
       cursoId: [null, Validators.required],
       esporteId: [null, Validators.required],
-      matriculasAtletas: this.fb.array([])
+      matriculasAtletas: this.fb.array([], Validators.required)
     });
   }
 
   ngOnInit(): void {
     this.usuarioEhTecnico = this.authService.possuiRole('TECNICO');
     this.matriculaTecnicoLogado = this.authService.getMatriculaUsuarioLogado();
-    this.carregarDadosIniciais();
-  }
-
-  carregarDadosIniciais(): void {
-    this.carregarAtletas();
-    this.carregarEquipes();
-    if (this.usuarioEhTecnico) {
-      this.carregarCursos();
-      this.carregarEsportes();
+    
+    if (this.usuarioEhTecnico && this.matriculaTecnicoLogado) {
+      this.carregarDadosIniciais();
     }
   }
 
-  // --- Métodos para Atletas ---
+  carregarDadosIniciais(): void {
+    this.isLoading = true;
+    this.carregarCursos();
+    this.carregarEsportes();
+    this.carregarEquipes(); // Carrega equipes primeiro para filtrar atletas corretamente
+    this.isLoading = false;
+  }
+
+  // --- MÉTODOS DE ATLETAS ---
   carregarAtletas(): void {
     this.atletaService.getAtletas(0, 200).subscribe(p => {
       this.atletas = p.content;
+      this.filtrarAtletasSemEquipe();
       this.cdr.markForCheck();
     });
   }
@@ -107,6 +110,7 @@ export class AtletasEquipesComponent implements OnInit {
       this.atletaForm.patchValue(atleta);
       this.atletaForm.get('matricula')?.disable();
       this.atletaForm.get('senha')?.clearValidators();
+      this.atletaForm.get('senha')?.setValue('');
     } else {
       this.atletaForm.reset();
       this.atletaForm.get('matricula')?.enable();
@@ -116,116 +120,70 @@ export class AtletasEquipesComponent implements OnInit {
   }
 
   salvarAtleta(): void {
-  if (this.atletaForm.invalid || !this.matriculaTecnicoLogado) {
-    return;
-  }
+    if (this.atletaForm.invalid || !this.matriculaTecnicoLogado) return;
 
-  this.isLoading = true;
-  this.mensagemErroModal = null;
-  const formValue = this.atletaForm.getRawValue();
-  const request: AtletaRequest = { ...formValue };
+    this.isLoading = true;
+    const formValue = this.atletaForm.getRawValue();
+    const request: AtletaRequest = { ...formValue };
+    if (!formValue.senha) delete request.senha;
 
-  // Remove o campo senha da requisição se estiver vazio
-  if (!formValue.senha) {
-    delete request.senha;
-  }
+    const acao = this.isEditando
+      ? this.tecnicoService.atualizarAtleta(this.matriculaTecnicoLogado, this.idEditando as string, request)
+      : this.tecnicoService.criarAtleta(this.matriculaTecnicoLogado, request);
 
-  const acao = this.isEditando
-    ? this.tecnicoService.atualizarAtleta(this.matriculaTecnicoLogado, this.idEditando as string, request)
-    : this.tecnicoService.criarAtleta(this.matriculaTecnicoLogado, request);
-
-  acao.pipe(finalize(() => {
-      this.isLoading = false;
-      this.cdr.markForCheck(); // Garante a atualização da UI em qualquer caso
-    }))
-    .subscribe({
+    acao.pipe(finalize(() => this.isLoading = false)).subscribe({
       next: () => {
-        this.carregarAtletas(); // Atualiza a lista em caso de sucesso
-        this.fecharModalAtleta(); // Fecha o modal em caso de sucesso
+        this.carregarDadosIniciais();
+        this.fecharModalAtleta();
       },
-      error: (err) => {
-        // Exibe um alerta claro em caso de erro
-        alert('Não foi possível salvar o atleta. Verifique os dados e tente novamente.');
-        this.mensagemErroModal = 'Erro ao salvar atleta.';
-        console.error('Erro detalhado:', err); // Mantém o erro detalhado no console
-      }
+      error: (err) => alert(`Erro ao salvar atleta: ${err.error?.message || 'Verifique os dados.'}`)
     });
-}
+  }
 
   deletarAtleta(matricula: string): void {
-    if (confirm('Tem certeza? Esta ação é permanente.') && this.matriculaTecnicoLogado) {
+    if (confirm('Tem certeza?') && this.matriculaTecnicoLogado) {
       this.tecnicoService.deletarAtleta(this.matriculaTecnicoLogado, matricula).subscribe({
-        next: (msg) => { alert(msg); this.carregarAtletas(); },
-        error: (err) => alert('Erro ao deletar atleta. Verifique se ele não pertence a uma equipe.')
+        next: () => { alert("Atleta deletado."); this.carregarDadosIniciais(); },
+        error: (err) => alert('Erro ao deletar atleta.')
       });
     }
   }
 
   fecharModalAtleta(): void { this.isAtletaModalAberto = false; }
 
-  // --- Métodos para Equipes ---
+  // --- MÉTODOS DE EQUIPES ---
   carregarEquipes(): void {
     this.equipeService.getEquipes(0, 200).subscribe(p => {
       this.equipes = p.content;
+      this.carregarAtletas(); // Agora carrega os atletas
       this.cdr.markForCheck();
     });
   }
-
-  carregarCursos(): void {
-    this.cursoService.getCursos(0, 200).subscribe(p => this.cursos = p.content);
-  }
-  carregarEsportes(): void {
-    this.esporteService.getEsportes(0, 200).subscribe(p => this.esportes = p.content);
-  }
+  
+  carregarCursos(): void { this.cursoService.getCursos(0, 200).subscribe(p => this.cursos = p.content); }
+  carregarEsportes(): void { this.esporteService.getEsportes(0, 200).subscribe(p => this.esportes = p.content); }
 
   abrirModalEquipe(equipe?: Equipe): void {
     this.isEquipeModalAberto = true;
     this.isEditando = !!equipe;
     this.mensagemErroModal = null;
-
-    // Limpa o formulário antes de preencher
+    
     this.equipeForm.reset();
-    const matriculasAtletas = this.equipeForm.get('matriculasAtletas') as FormArray;
-    matriculasAtletas.clear();
+    const matriculasAtletasArray = this.equipeForm.get('matriculasAtletas') as FormArray;
+    matriculasAtletasArray.clear();
 
     if (equipe) {
-      // --- LÓGICA DE EDIÇÃO COMPLETA ---
       this.idEditando = equipe.id;
-
-      // Encontra o curso e o esporte correspondentes para obter os IDs
-      const cursoSelecionado = this.cursos.find(c => c.nome === equipe.nomeCurso);
-      const esporteSelecionado = this.esportes.find(e => e.nome === equipe.nomeEsporte);
-
+      const cursoDaEquipe = this.cursos.find(c => c.nome === equipe.nomeCurso);
+      const esporteDaEquipe = this.esportes.find(e => e.nome === equipe.nomeEsporte);
+      
       this.equipeForm.patchValue({
         nome: equipe.nome,
-        cursoId: cursoSelecionado ? cursoSelecionado.id : null,
-        esporteId: esporteSelecionado ? esporteSelecionado.id : null
+        cursoId: cursoDaEquipe ? cursoDaEquipe.id : null,
+        esporteId: esporteDaEquipe ? esporteDaEquipe.id : null
       });
 
-      
-
-    }
-  }
-
-  // Adicione este método auxiliar para o template HTML
-  atletaEstaNaEquipe(matricula: string): boolean {
-    const matriculasAtletas = this.equipeForm.get('matriculasAtletas') as FormArray;
-    return matriculasAtletas.value.includes(matricula);
-  }
-
-  onCheckboxChange(e: any) {
-    const matriculas: FormArray = this.equipeForm.get('matriculasAtletas') as FormArray;
-    if (e.target.checked) {
-      matriculas.push(this.fb.control(e.target.value));
-    } else {
-      let i = 0;
-      matriculas.controls.forEach((item) => {
-        if (item.value == e.target.value) {
-          matriculas.removeAt(i);
-          return;
-        }
-        i++;
-      });
+      equipe.atletas.forEach(atleta => matriculasAtletasArray.push(this.fb.control(atleta.matricula)));
     }
   }
 
@@ -234,11 +192,7 @@ export class AtletasEquipesComponent implements OnInit {
 
     const formValue = this.equipeForm.value;
     const request: EquipeRequest = {
-      equipe: {
-        nome: formValue.nome,
-        cursoId: +formValue.cursoId,
-        esporteId: +formValue.esporteId,
-      },
+      equipe: { nome: formValue.nome, cursoId: +formValue.cursoId, esporteId: +formValue.esporteId },
       matriculasAtletas: formValue.matriculasAtletas
     };
 
@@ -248,18 +202,40 @@ export class AtletasEquipesComponent implements OnInit {
 
     acao.subscribe({
       next: () => { this.carregarDadosIniciais(); this.fecharModalEquipe(); },
-      error: (err) => this.mensagemErroModal = `Erro ao salvar equipe: ${err.error}`
+      error: (err) => alert(`Erro ao salvar equipe: ${err.error?.message || 'Verifique os dados.'}`)
     });
   }
 
   deletarEquipe(id: number): void {
-    if (confirm('Tem certeza que deseja excluir esta equipe?') && this.matriculaTecnicoLogado) {
+    if (confirm('Tem certeza?') && this.matriculaTecnicoLogado) {
       this.tecnicoService.deletarEquipe(this.matriculaTecnicoLogado, id).subscribe({
-        next: (msg) => { alert(msg); this.carregarEquipes(); },
+        next: () => { alert("Equipe deletada."); this.carregarEquipes(); },
         error: (err) => alert('Erro ao excluir equipe.')
       });
     }
   }
 
   fecharModalEquipe(): void { this.isEquipeModalAberto = false; }
+
+  // --- MÉTODOS AUXILIARES ---
+  filtrarAtletasSemEquipe(): void {
+    const todasMatriculasEmEquipes = new Set(this.equipes.flatMap(e => e.atletas.map(a => a.matricula)));
+    this.atletasSemEquipe = this.atletas.filter(a => !todasMatriculasEmEquipes.has(a.matricula));
+  }
+
+  atletaEstaNaEquipe(matricula: string): boolean {
+    const matriculasAtletas = this.equipeForm.get('matriculasAtletas') as FormArray;
+    return matriculasAtletas.value.includes(matricula);
+  }
+
+  onCheckboxChange(e: Event) {
+    const checkbox = e.target as HTMLInputElement;
+    const matriculas: FormArray = this.equipeForm.get('matriculasAtletas') as FormArray;
+    if (checkbox.checked) {
+      matriculas.push(this.fb.control(checkbox.value));
+    } else {
+      const index = matriculas.controls.findIndex(x => x.value === checkbox.value);
+      if (index !== -1) matriculas.removeAt(index);
+    }
+  }
 }
